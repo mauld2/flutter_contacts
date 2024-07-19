@@ -295,22 +295,26 @@ public class ContactsServicePlugin implements MethodCallHandler, FlutterPlugin, 
                     finishWithResult(FORM_OPERATION_CANCELED);
                     return true;
                 }
-                Cursor cursor = null;
-                if (intent != null) {
-                    Uri contactUri = intent.getData();
-                    cursor = contentResolver.query(contactUri, null, null, null, null);
-                    if (cursor.moveToFirst()) {
-                        String id = contactUri.getLastPathSegment();
-                        getContacts("openDeviceContactPicker", id, false, false, false, localizedLabels, this.result);
-                    } else {
-                        Log.e(LOG_TAG, "onActivityResult - cursor.moveToFirst() returns false");
-                        finishWithResult(FORM_OPERATION_CANCELED);
+                try {
+                    Cursor cursor = null;
+                    if (intent != null) {
+                        Uri contactUri = intent.getData();
+                        cursor = contentResolver.query(contactUri, null, null, null, null);
+                        if (cursor.moveToFirst()) {
+                            String id = contactUri.getLastPathSegment();
+                            getContacts("openDeviceContactPicker", id, false, false, false, localizedLabels, this.result);
+                        } else {
+                            Log.e(LOG_TAG, "onActivityResult - cursor.moveToFirst() returns false");
+                            finishWithResult(FORM_OPERATION_CANCELED);
+                        }
                     }
+                    return true;
+                } catch (Exception e) {
+                    if (cursor != null) {
+                        cursor.close();
+                    }
+                    return true;
                 }
-                if(cursor != null){
-                    cursor.close();
-                }
-                return true;
             }
 
             finishWithResult(FORM_COULD_NOT_BE_OPEN);
